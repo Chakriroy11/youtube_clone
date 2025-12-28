@@ -1,16 +1,13 @@
-// frontend/src/pages/Auth.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login, register } from "../store/authSlice";
 import { useNavigate } from "react-router-dom";
 
 /**
  * Auth page
- * - nicer centered card
- * - clear field validation + inline errors
- * - server-side errors shown
- * - sign in / register toggle
- * - optional Google Form is collapsed by default
+ * - Enhanced centered card with YouTube-style clean UI
+ * - Stricter password validation (Upper/Lower/Number/Special)
+ * - Dynamic password requirement feedback
  */
 export default function Auth() {
   const dispatch = useDispatch();
@@ -27,8 +24,11 @@ export default function Auth() {
     password: "",
   });
 
-  const [fieldErrors, setFieldErrors] = useState({}); // { field: message }
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+
+  // Stricter Password Validation Regex
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const resetErrors = () => {
     setFieldErrors({});
@@ -38,18 +38,19 @@ export default function Auth() {
   const validate = () => {
     const errs = {};
     if (!isLogin) {
-      // register validations
       if (!form.username || form.username.trim().length < 3)
         errs.username = "Username must be at least 3 characters.";
       if (!form.email || !/^\S+@\S+\.\S+$/.test(form.email))
         errs.email = "Please enter a valid email address.";
-      if (!form.password || form.password.length < 6)
-        errs.password = "Password must be at least 6 characters.";
+      
+      // RECTIFICATION: Match stricter backend password rules
+      if (!passwordRegex.test(form.password)) {
+        errs.password = "Password does not meet the security requirements.";
+      }
     } else {
-      // login validations
       if (!form.emailOrUsername || form.emailOrUsername.trim().length < 1)
         errs.emailOrUsername = "Email or username is required.";
-      if (!form.password || form.password.length < 6)
+      if (form.password.length < 6)
         errs.password = "Password must be at least 6 characters.";
     }
     setFieldErrors(errs);
@@ -73,7 +74,6 @@ export default function Auth() {
         if (res.type && res.type.endsWith("fulfilled")) {
           navigate("/");
         } else {
-          // handle server error payload (authSlice rejects with err.response?.data)
           const err = res.payload || res.error || {};
           setSubmitError(err.message || "Sign in failed. Check credentials.");
         }
@@ -86,7 +86,6 @@ export default function Auth() {
           })
         );
         if (res.type && res.type.endsWith("fulfilled")) {
-          // successful register -> switch to login with message
           setIsLogin(true);
           setForm({ ...form, emailOrUsername: form.email });
           setSubmitError(null);
@@ -102,148 +101,125 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-start justify-center py-12 px-4 bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h2 className="mb-4 text-2xl font-semibold text-gray-900">
-          {isLogin ? "Sign in" : "Create account"}
-        </h2>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-[#f9f9f9]">
+      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100">
+        <div className="flex flex-col items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {isLogin ? "Sign in" : "Create account"}
+          </h2>
+          <p className="text-gray-600 text-sm mt-2">to continue to YouTube Clone</p>
+        </div>
 
-        {/* Server / submit error */}
         {submitError || auth.error ? (
-          <div className="p-3 mb-3 text-sm text-red-700 border border-red-100 rounded bg-red-50">
-            {submitError ||
-              (auth.error &&
-                (auth.error.message || JSON.stringify(auth.error)))}
+          <div className="p-4 mb-6 text-sm text-red-700 border border-red-200 rounded-lg bg-red-50">
+            {submitError || (auth.error && (auth.error.message || JSON.stringify(auth.error)))}
           </div>
         ) : null}
 
-        <form onSubmit={submit} className="flex flex-col gap-3">
+        <form onSubmit={submit} className="flex flex-col gap-4">
           {!isLogin && (
-            <>
-              <label className="text-sm text-gray-700">Username</label>
+            <div>
               <input
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                placeholder="Choose a username"
-                className={`p-3 border rounded focus:outline-none ${
-                  fieldErrors.username ? "border-red-400" : "border-gray-200"
+                placeholder="Username"
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                  fieldErrors.username ? "border-red-400" : "border-gray-300"
                 }`}
-                aria-invalid={!!fieldErrors.username}
               />
-              {fieldErrors.username && (
-                <div className="text-xs text-red-600">
-                  {fieldErrors.username}
-                </div>
-              )}
-            </>
+              {fieldErrors.username && <p className="text-[10px] text-red-600 mt-1 ml-1">{fieldErrors.username}</p>}
+            </div>
           )}
 
           {!isLogin && (
-            <>
-              <label className="text-sm text-gray-700">Email</label>
+            <div>
               <input
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="Email address"
-                className={`p-3 border rounded focus:outline-none ${
-                  fieldErrors.email ? "border-red-400" : "border-gray-200"
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                  fieldErrors.email ? "border-red-400" : "border-gray-300"
                 }`}
-                aria-invalid={!!fieldErrors.email}
               />
-              {fieldErrors.email && (
-                <div className="text-xs text-red-600">{fieldErrors.email}</div>
-              )}
-            </>
+              {fieldErrors.email && <p className="text-[10px] text-red-600 mt-1 ml-1">{fieldErrors.email}</p>}
+            </div>
           )}
 
           {isLogin && (
-            <>
-              <label className="text-sm text-gray-700">Email or Username</label>
+            <div>
               <input
                 value={form.emailOrUsername}
-                onChange={(e) =>
-                  setForm({ ...form, emailOrUsername: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, emailOrUsername: e.target.value })}
                 placeholder="Email or username"
-                className={`p-3 border rounded focus:outline-none ${
-                  fieldErrors.emailOrUsername
-                    ? "border-red-400"
-                    : "border-gray-200"
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                  fieldErrors.emailOrUsername ? "border-red-400" : "border-gray-300"
                 }`}
-                aria-invalid={!!fieldErrors.emailOrUsername}
               />
-              {fieldErrors.emailOrUsername && (
-                <div className="text-xs text-red-600">
-                  {fieldErrors.emailOrUsername}
-                </div>
-              )}
-            </>
+              {fieldErrors.emailOrUsername && <p className="text-[10px] text-red-600 mt-1 ml-1">{fieldErrors.emailOrUsername}</p>}
+            </div>
           )}
 
-          <label className="text-sm text-gray-700">Password</label>
-          <input
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            placeholder="Password"
-            className={`p-3 border rounded focus:outline-none ${
-              fieldErrors.password ? "border-red-400" : "border-gray-200"
-            }`}
-            aria-invalid={!!fieldErrors.password}
-          />
-          {fieldErrors.password && (
-            <div className="text-xs text-red-600">{fieldErrors.password}</div>
-          )}
+          <div>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Password"
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                fieldErrors.password ? "border-red-400" : "border-gray-300"
+              }`}
+            />
+            {fieldErrors.password && <p className="text-[10px] text-red-600 mt-1 ml-1">{fieldErrors.password}</p>}
+            
+            {/* RECTIFICATION: Visual feedback for password requirements */}
+            {!isLogin && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg text-[11px] text-gray-500 space-y-1">
+                <p className="font-bold mb-1">Password must include:</p>
+                <p className={/[A-Z]/.test(form.password) ? "text-green-600" : ""}>• One uppercase letter</p>
+                <p className={/[a-z]/.test(form.password) ? "text-green-600" : ""}>• One lowercase letter</p>
+                <p className={/\d/.test(form.password) ? "text-green-600" : ""}>• One number</p>
+                <p className={/[@$!%*?&]/.test(form.password) ? "text-green-600" : ""}>• One special character (@$!%*?&)</p>
+                <p className={form.password.length >= 8 ? "text-green-600" : ""}>• Minimum 8 characters</p>
+              </div>
+            )}
+          </div>
 
           <button
             type="submit"
-            className="py-2 mt-1 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none disabled:opacity-60"
+            className="w-full py-3 mt-2 text-white bg-blue-600 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50"
             disabled={auth.loading}
           >
-            {auth.loading
-              ? isLogin
-                ? "Signing in..."
-                : "Registering..."
-              : isLogin
-              ? "Sign in"
-              : "Register"}
+            {auth.loading ? "Processing..." : isLogin ? "Sign in" : "Register"}
           </button>
         </form>
 
-        <div className="flex items-center justify-between mt-4 text-sm">
+        <div className="mt-8 flex flex-col gap-4 items-center">
           <button
             onClick={() => {
               resetErrors();
               setIsLogin(!isLogin);
             }}
-            className="text-blue-600 hover:underline"
+            className="text-sm text-blue-600 font-bold hover:underline"
           >
-            {isLogin ? "Create an account" : "Have an account? Sign in"}
+            {isLogin ? "Create account" : "Sign in instead"}
           </button>
 
-          {/* optional toggle for Google form embed */}
           <button
             onClick={() => setShowFormEmbed((s) => !s)}
-            className="text-xs text-gray-600 hover:underline"
-            aria-expanded={showFormEmbed}
+            className="text-[10px] text-gray-400 hover:text-gray-600 transition underline"
           >
-            {showFormEmbed ? "Hide optional form" : "Show optional form"}
+            {showFormEmbed ? "Hide feedback form" : "Trouble signing in?"}
           </button>
         </div>
 
-        {/* optional Google Form area (collapsed by default) */}
         {showFormEmbed && (
-          <div className="mt-6 text-sm text-gray-600">
-            <div className="mb-2">Embedded Google Form (optional)</div>
-            <div className="h-56 overflow-auto border rounded">
-              {/* Use your own valid embedded form link here. If the URL is invalid you'll see an external message. */}
-              <iframe
-                title="google-form"
-                src="https://docs.google.com/forms/d/e/1FAIpQLSd-placeholder/viewform?embedded=true"
-                className="w-full h-[480px] min-h-[300px]"
-                style={{ border: "none" }}
-              />
-            </div>
+          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <p className="text-[10px] text-gray-500 mb-2 italic">Please fill this if you encounter issues:</p>
+            <iframe
+              title="google-form"
+              src="https://docs.google.com/forms/d/e/1FAIpQLSd-placeholder/viewform?embedded=true"
+              className="w-full h-40 border-none rounded bg-white"
+            />
           </div>
         )}
       </div>
