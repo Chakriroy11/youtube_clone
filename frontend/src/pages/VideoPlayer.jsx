@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom"; // Added Link
 import { useDispatch, useSelector } from "react-redux";
-import { fetchVideoById, likeVideo, dislikeVideo } from "../store/VideoSlice";
+import { fetchVideoById, likeVideo, dislikeVideo, fetchVideos } from "../store/VideoSlice"; // Added fetchVideos
 import {
   fetchComments,
   addComment,
@@ -17,6 +17,7 @@ export default function VideoPlayer() {
 
   // Redux Selectors
   const video = useSelector((s) => s.videos.current);
+  const allVideos = useSelector((s) => s.videos.list); // Pulling all videos for sidebar
   const auth = useSelector((s) => s.auth);
   const comments = useSelector((s) => s.comments.list);
   const commentsLoading = useSelector((s) => s.comments.loading);
@@ -28,18 +29,20 @@ export default function VideoPlayer() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
 
-  // Load video and comments on mount or ID change
+  // Load video, recommendations, and comments on mount or ID change
   useEffect(() => {
     if (!id) return;
     dispatch(fetchVideoById(id));
     dispatch(fetchComments(id));
+    dispatch(fetchVideos()); // Fetch all videos to populate the "Recommended" sidebar
     
     // Record view to backend
     API.post(`/videos/${id}/view`).catch(() => {});
     
-    // Reset local UI states
+    // Reset local UI states and scroll to top for new video
     setText("");
     setEditingId(null);
+    window.scrollTo(0, 0);
   }, [dispatch, id]);
 
   // Handle click outside for comment menus
@@ -98,28 +101,24 @@ export default function VideoPlayer() {
   if (!video) return <div className="p-10 text-center animate-pulse text-gray-500">Loading Video...</div>;
 
   return (
-    // RECTIFICATION: overflow-x-hidden and w-full prevent horizontal overflow on desktop
     <div className="w-full max-w-full overflow-x-hidden bg-white min-h-screen">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-8 flex flex-col lg:flex-row gap-8">
         
         {/* Main Section (Player + Details + Comments) */}
         <div className="flex-1 w-full lg:max-w-[72%]">
           
-          {/* Video Player Surface - Watchable Fix */}
           <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
             <video 
               key={video.videoUrl} 
               poster={video.thumbnailUrl} 
               controls 
               className="w-full h-full object-contain"
-              onError={(e) => console.error("Video failed to load:", e)}
             >
                 <source src={video.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
           </div>
 
-          {/* Title and Stats */}
           <div className="mt-5">
             <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">{video.title}</h1>
             
@@ -132,14 +131,13 @@ export default function VideoPlayer() {
                 />
                 <div className="flex flex-col">
                   <span className="font-bold text-base text-gray-900">{video.uploader?.username || "Channel Name"}</span>
-                  <span className="text-xs text-gray-500">1.2M subscribers</span>
+                  <span className="text-xs text-gray-500">Subscribers</span>
                 </div>
                 <button className="ml-4 px-6 py-2 bg-black text-white rounded-full text-sm font-bold transition hover:bg-gray-800">
                   Subscribe
                 </button>
               </div>
 
-              {/* Like/Dislike Buttons */}
               <div className="flex items-center bg-gray-100 rounded-full px-1">
                 <button 
                   onClick={handleLike}
@@ -156,7 +154,6 @@ export default function VideoPlayer() {
               </div>
             </div>
 
-            {/* Description Box */}
             <div className="mt-2 p-4 bg-gray-100 hover:bg-gray-200 transition rounded-xl">
               <div className="flex gap-3 text-sm font-bold mb-1">
                 <span>{video.views?.toLocaleString()} views</span>
@@ -166,7 +163,6 @@ export default function VideoPlayer() {
             </div>
           </div>
 
-          {/* Comment Section */}
           <div className="mt-8">
             <h3 className="text-xl font-bold mb-6 text-gray-900">{comments?.length || 0} Comments</h3>
             
@@ -230,19 +226,41 @@ export default function VideoPlayer() {
           </div>
         </div>
 
-        {/* Sidebar / Recommendations */}
+        {/* Sidebar / Recommendations - UPDATED TO MAP REAL DATA */}
         <aside className="w-full lg:w-[28%] space-y-6">
           <h4 className="font-bold text-base text-gray-900">Recommended for you</h4>
           <div className="space-y-4">
-             {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="flex gap-3 group cursor-pointer">
-                    <div className="w-44 h-24 bg-gray-200 rounded-xl flex-shrink-0 animate-pulse group-hover:bg-gray-300 transition" />
-                    <div className="flex-1 space-y-2 py-1">
-                        <div className="h-4 bg-gray-200 rounded w-full animate-pulse group-hover:bg-gray-300" />
-                        <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse group-hover:bg-gray-300" />
+             {allVideos && allVideos.length > 0 ? (
+               allVideos.filter(v => v._id !== id).map((item) => (
+                <Link to={`/video/${item._id}`} key={item._id} className="flex gap-3 group cursor-pointer no-underline">
+                    <div className="w-40 h-24 bg-gray-200 rounded-xl flex-shrink-0 overflow-hidden">
+                        <img 
+                          src={item.thumbnailUrl} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+                          alt={item.title} 
+                        />
                     </div>
+                    <div className="flex-1 py-1">
+                        <h5 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
+                          {item.title}
+                        </h5>
+                        <p className="text-[11px] text-gray-500 mt-1">{item.uploader?.username}</p>
+                        <p className="text-[10px] text-gray-500">{item.views?.toLocaleString()} views</p>
+                    </div>
+                </Link>
+             ))
+            ) : (
+              /* Fallback skeleton if no videos are loaded */
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex gap-3 animate-pulse">
+                  <div className="w-40 h-24 bg-gray-200 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-full" />
+                    <div className="h-2 bg-gray-200 rounded w-2/3" />
+                  </div>
                 </div>
-             ))}
+              ))
+            )}
           </div>
         </aside>
 
