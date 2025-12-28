@@ -1,0 +1,25 @@
+/* frontend/src/styles/global.css */
+/* Small UI tweaks and the rules used by the new components */
+
+:root { --yc-brand: #FF0000; }
+
+body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+.transition-width { transition: width .18s ease; }
+
+/* Sidebar collapsed rail center icons */
+@media (min-width: 1024px) {
+  aside.w-20 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  aside.w-20 nav a span:not(:first-child) { display: none; }
+}
+
+/* make the main card shadow look like your screenshot */
+.shadow-xl { box-shadow: 0 20px 40px rgba(15,23,42,0.06); }
+
+/* small responsive tweaks for the auth iframe */
+@media (max-width: 640px) {
+  .auth-iframe { height: 360px !important; }
+}
+
+/* center main area when there is no grid content */
+.main-centered { display:flex; justify-content:center; align-items:flex-start; padding:2rem; }

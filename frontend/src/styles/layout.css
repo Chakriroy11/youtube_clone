@@ -1,0 +1,78 @@
+:root {
+  --header-height: 56px; /* header h-14 */
+  --gutter: 24px; /* matches p-6 padding in components */
+}
+
+/* Layout root (you may have a wrapper <div class="app-layout"> that places sidebar + main) */
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  /* do not allow body to scroll for the page; inner regions will scroll */
+}
+
+/* Sidebar: sticky under header and scrolls internally
+  NOTE: we keep this sticky only for XL (>=1280px). For smaller screens sidebar becomes fixed/overlay or static.
+*/
+.app-sidebar {
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 40;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  padding-bottom: 24px;
+}
+
+/* main content wrapper (right side) */
+.main-content {
+  flex: 1 1 auto;
+  min-height: calc(100vh - var(--header-height));
+  box-sizing: border-box;
+  overflow: hidden; /* ensure the body doesn't scroll; feed-scroll does */
+}
+
+/* the feed (videos) scroll area */
+.feed-scroll {
+  /* height is set dynamically by Home.jsx to exactly the available height */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 32px;
+}
+
+/* minor: keep header on top of sidebar content if necessary */
+header.sticky {
+  z-index: 60;
+}
+
+/* optional scrollbar styling */
+.app-sidebar::-webkit-scrollbar,
+.feed-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.app-sidebar::-webkit-scrollbar-thumb,
+.feed-scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(0,0,0,0.06);
+}
+.app-sidebar:hover::-webkit-scrollbar-thumb,
+.feed-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+}
+
+/* RESPONSIVE BEHAVIOR
+  - XL (>=1280px): keep sticky/in-flow sidebar (default styles above)
+  - Below 1280px: sidebar becomes overlay/drawer or fixed rail (we override sticky -> static)
+*/
+@media (max-width: 1279px) {
+  /* ensure .app-sidebar doesn't stick or push content on tablet/phone */
+  .app-sidebar { position: static; height: auto; overflow: visible; }
+  .main-content { min-height: auto; overflow: visible; }
+  .feed-scroll { height: auto; overflow: visible; }
+}
+
+/* small tweak: when overlay drawers are used (fixed), prevent body scroll if desired */
+/* body.noscroll { overflow: hidden; } */

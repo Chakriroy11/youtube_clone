@@ -1,0 +1,161 @@
+/* frontend/src/styles/Home.css */
+/* Rules from Home.css */
+.home-page {
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-width: 900px) {
+  .yc-sidebar {
+    display: none;
+  }
+}
+
+/* START: Horizontal Scrollable Filters Fix */
+
+/* Wrapper for the filters and the scroll arrow */
+.filters-wrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  /* FIX: Make the filter bar stick below the padding of the Home component */
+  position: sticky;
+  top: -1.5rem; /* Compensate for the parent PADDING (p-6 = 1.5rem) */
+  z-index: 10;
+  background-color: white; /* Ensure the background covers content when scrolling */
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem; /* Add top padding to lift filters slightly */
+  
+  /* FIX: Compensate for parent PADDING (p-6) to make sticky background full width */
+  margin-left: -1.5rem; 
+  margin-right: -1.5rem; 
+  padding-left: 1.5rem; /* Add back padding inside the wrapper */
+  padding-right: 1.5rem; /* Add back padding inside the wrapper */
+}
+
+/* The scrollable row containing the chip buttons */
+.filters-row {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  
+  /* KEY FIXES: Prevent wrapping and enable scroll */
+  overflow-x: scroll;
+  white-space: nowrap; /* Prevents chips from breaking to a new line */
+  
+  /* Enable smooth scrolling on touch devices (swipeable) */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Hide scrollbar on most browsers for a cleaner look */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  padding-bottom: 8px; /* Padding for visual separation */
+}
+
+/* Hide Webkit scrollbar (Chrome, Safari) */
+.filters-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chip spacing (Unchanged) */
+.filters-row > .chip:not(:last-child) {
+  margin-right: 0.75rem;
+}
+
+/* Chip Button Styling (Unchanged) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  
+  flex-shrink: 0; 
+  
+  background-color: #f2f2f2;
+  color: #0f0f0f;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.chip:hover {
+  background-color: #e5e5e5;
+}
+
+.chip-active {
+  background-color: #0f0f0f;
+  color: white;
+  border-color: #0f0f0f;
+}
+
+.chip-active:hover {
+  background-color: #2c2c2c;
+}
+
+/* Scroll Arrow Button (with fade) */
+.filter-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  /* Fade effect */
+  background: linear-gradient(to left, white 40%, rgba(255, 255, 255, 0));
+  color: #0f0f0f;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -1rem;
+  box-shadow: -10px 0 10px rgba(255, 255, 255, 0.8);
+  
+  /* Hidden by default until JS shows them, ensuring no click on invisible areas */
+  display: flex; 
+  opacity: 0; 
+  pointer-events: none; 
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Hide arrows on mobile screens (below 768px) where touch scrolling is expected */
+@media (max-width: 767px) {
+  .filter-arrow {
+    display: none !important;
+  }
+}
+
+/* Conditional classes applied by JS to the filters-wrap on desktop/tablet */
+@media (min-width: 768px) {
+  /* Show/Enable Left Arrow */
+  .filters-wrap.has-left-arrow > .filter-arrow-left {
+    opacity: 1;
+    pointer-events: auto;
+    box-shadow: 10px 0 10px rgba(255, 255, 255, 0.8);
+    margin-left: 0;
+    background: linear-gradient(to right, white 40%, rgba(255, 255, 255, 0));
+  }
+  
+  /* Show/Enable Right Arrow */
+  .filters-wrap.has-right-arrow > .filter-arrow-right {
+    opacity: 1;
+    pointer-events: auto;
+    box-shadow: -10px 0 10px rgba(255, 255, 255, 0.8);
+    margin-right: 0;
+    margin-left: -1rem;
+    background: linear-gradient(to left, white 40%, rgba(255, 255, 255, 0));
+  }
+
+  /* Ensure the filters row shifts slightly to accommodate the left arrow fade area */
+  .filters-wrap.has-left-arrow > .filters-row {
+    padding-left: 0.5rem; /* Small offset */
+  }
+}
+
+/* Ensure no gap between scrollable content and right arrow */
+.filters-wrap.has-right-arrow > .filters-row {
+  padding-right: 0; 
+}
+/* END: Horizontal Scrollable Filters Fix */
