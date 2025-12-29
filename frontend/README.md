@@ -1,11 +1,14 @@
 # YouTube Clone - Full Stack MERN Application
 
-## 📌 Project Overview
+##  Project Overview
 A robust, full-stack video-sharing platform built with the MERN stack. This application replicates core YouTube functionalities, including video streaming, content search/filtering, user authentication, and interactive social features like comments and likes.
 
 ---
+**Repository Link:** [https://github.com/Chakriroy11/youtube_clone.git](https://github.com/Chakriroy11/youtube_clone.git)
 
-## 🚀 Key Features
+---
+
+##  Key Features
 
 ### **Front-End (React + Vite)**
 * **Dynamic Home Page**: A responsive grid layout featuring video thumbnails, titles, and view counts.
@@ -22,7 +25,7 @@ A robust, full-stack video-sharing platform built with the MERN stack. This appl
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 * **Frontend**: React.js, Redux Toolkit (State Management), React Router, Axios, Tailwind CSS.
 * **Backend**: Node.js, Express.js (ES Modules).
 * **Database**: MongoDB (Local instance managed via MongoDB Compass).
@@ -30,7 +33,21 @@ A robust, full-stack video-sharing platform built with the MERN stack. This appl
 
 ---
 
-## 📂 Project Structure
+
+
+
+##  Installation & Setup
+
+### **1. Prerequisites**
+* Node.js (v18 or higher)
+* MongoDB Compass (Running locally)
+
+### **2. Setup Instructions**
+1. **Clone the repository**:
+   ```bash
+   git clone [https://github.com/Chakriroy11/youtube_clone.git](https://github.com/Chakriroy11/youtube_clone.git)
+
+##  Project Structure
 ```text
 /CAPSTONE-PROJECT
 ├── /backend
