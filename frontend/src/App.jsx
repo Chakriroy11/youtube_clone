@@ -19,19 +19,14 @@ export default function App() {
       const storedValue = localStorage.getItem("sidebarOpen");
       return storedValue !== null ? JSON.parse(storedValue) : true;
     } catch (error) {
-      console.error("Error reading sidebar state from localStorage", error);
-      return true; // Default to opened on error
+      return true;
     }
   });
 
   const toggleSidebar = () => {
     setSidebarOpen((prev) => {
       const newState = !prev;
-      try {
-        localStorage.setItem("sidebarOpen", JSON.stringify(newState));
-      } catch (error) {
-        console.error("Error saving sidebar state to localStorage", error);
-      }
+      localStorage.setItem("sidebarOpen", JSON.stringify(newState));
       return newState;
     });
   };
@@ -41,37 +36,35 @@ export default function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token) {
-      // Attach token to axios
       API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       dispatch(fetchMe());
     }
   }, [dispatch]);
 
-  let mainContentClass = "flex-1 min-h-screen pt-14 overflow-x-hidden";
+  /* RECTIFICATION LOGIC:
+     - transition-all duration-300: Animates the margin so there is no flickering gap.
+     - md:ml-[240px]: Matches the expanded sidebar exactly.
+     - md:ml-[72px]: Matches the mini sidebar exactly.
+  */
+  let mainContentClass = "flex-1 min-h-screen pt-14 overflow-x-hidden transition-all duration-300 ml-0";
 
   if (isHomePage) {
     if (sidebarOpen) {
-      mainContentClass += " xl:ml-0 transition-all duration-150";
+      mainContentClass += " md:ml-[240px]"; 
     } else {
-      mainContentClass += " xl:ml-20 transition-all duration-150";
+      mainContentClass += " md:ml-[72px]";
     }
   } else {
-    mainContentClass += " xl:ml-0 md:ml-0";
-  }
-
-  if (isHomePage && !sidebarOpen) {
-    mainContentClass += " md:ml-14";
+    // For Video Player page, we use 0 margin so it takes full width
+    mainContentClass += " ml-0";
   }
 
   return (
-    <div className="min-h-screen bg-yc-bg">
+    <div className="min-h-screen bg-white">
       <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-
       <div className="flex w-full">
         <Sidebar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} />
-
         <main className={mainContentClass}>
           <Routes>
             <Route path="/" element={<Home />} />
