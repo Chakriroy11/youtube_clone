@@ -250,7 +250,6 @@ export default function Header({ onToggleSidebar }) {
         {effectiveUser ? "Your channel / Profile" : "Sign in"}
       </button>
 
-      {/* Only show Create channel if logged in */}
       {isLoggedIn && (
         <button
           onClick={openCreateFromMenu}
@@ -294,10 +293,10 @@ export default function Header({ onToggleSidebar }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+      {/* RECTIFICATION: Changed to 'fixed top-0 left-0 w-full' for a static nav bar */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="w-full px-3 sm:px-4 lg:px-6">
           <div className="flex items-center gap-3 h-14">
-            {/* left area: burger + logo */}
             <div className="flex items-center gap-3 min-w-[140px]">
               <button
                 onClick={onToggleSidebar}
@@ -335,9 +334,7 @@ export default function Header({ onToggleSidebar }) {
               </Link>
             </div>
 
-            {/* center area: search */}
             <div className="relative flex items-center justify-center flex-1 px-2">
-              {/* Desktop & tablet search */}
               <form
                 onSubmit={onSearchSubmit}
                 className="hidden w-full max-w-2xl sm:block"
@@ -390,7 +387,6 @@ export default function Header({ onToggleSidebar }) {
                 </div>
               </form>
 
-              {/* Mobile: small search icon that toggles overlay */}
               <div className="flex items-center justify-end w-full gap-2 sm:hidden">
                 <button
                   aria-label="Open search"
@@ -416,7 +412,6 @@ export default function Header({ onToggleSidebar }) {
                 </button>
               </div>
 
-              {/* suggestions container (positioned under search), reused for mobile overlay too */}
               <div
                 ref={suggestionsRef}
                 className="absolute left-0 right-0 z-50 flex justify-center mt-2 pointer-events-none top-full"
@@ -476,7 +471,6 @@ export default function Header({ onToggleSidebar }) {
               </div>
             </div>
 
-            {/* right area: actions */}
             <div className="flex items-center gap-2 min-w-[140px] justify-end">
               {isLoggedIn && (
                 <button
@@ -558,9 +552,9 @@ export default function Header({ onToggleSidebar }) {
         </div>
       </header>
 
-      {/* Mobile search overlay (full-width under header) */}
+      {/* Mobile search overlay */}
       {showMobileSearch && (
-        <div className="sm:hidden fixed inset-x-0 top-[56px] z-50 px-3">
+        <div className="sm:hidden fixed inset-x-0 top-[56px] z-50 px-3 bg-white pb-2 shadow-md">
           <div className="w-full max-w-2xl mx-auto">
             <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
               <input
@@ -616,7 +610,6 @@ export default function Header({ onToggleSidebar }) {
                 </svg>
               </button>
             </form>
-            {/* suggestions for mobile overlay will show in the same suggestionsRef area because top-full positions relative to header; but to be safe show them here too */}
             <div className="mt-2">
               {showSuggestions &&
                 (loadingSuggestions || suggestions.length > 0 || noResults) && (
